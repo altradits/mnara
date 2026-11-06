@@ -1,0 +1,55 @@
+name: Bug report
+description: Report something that does not work as documented.
+labels: ["bug", "needs-triage"]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Mnara version
+      placeholder: e.g. v0.1.0
+    validations:
+      required: true
+  - type: input
+    id: lnd
+    attributes:
+      label: LND version and backend
+      description: Backend is neutrino, bitcoind, or btcd.
+      placeholder: e.g. v0.21.6-beta, neutrino
+    validations:
+      required: true
+  - type: dropdown
+    id: network
+    attributes:
+      label: Network
+      options:
+        - mainnet
+        - testnet4
+        - signet
+        - regtest
+    validations:
+      required: true
+  - type: textarea
+    id: shown
+    attributes:
+      label: What the page showed
+    validations:
+      required: true
+  - type: textarea
+    id: getinfo
+    attributes:
+      label: What `lncli getinfo` showed
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to repeat
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Remove macaroons and IPs before you paste.
+    validations:
+      required: false
