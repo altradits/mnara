@@ -1,0 +1,36 @@
+name: Commits
+
+on:
+  pull_request:
+    types: [opened, reopened, edited, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  check:
+    name: Check commit messages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check one line messages
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const fail = 'Commit messages are one line. Please squash or reword.';
+            const pattern = /^[a-z0-9_./-]+(, ?[a-z0-9_./-]+)*: \S.{1,70}$/;
+            const { owner, repo } = context.repo;
+            const n = context.payload.pull_request.number;
+            const commits = await github.paginate(github.rest.pulls.listCommits, {
+              owner, repo, pull_number: n
+            });
+            for (const c of commits) {
+              const login = (c.author && c.author.login) || '';
+              if (login === 'dependabot[bot]') continue;
+              const msg = (c.commit && c.commit.message) || '';
+              const first = msg.split('\n')[0];
+              if (msg.trim() !== first.trim() || !pattern.test(first)) {
+                core.setFailed(fail);
+                return;
+              }
+            }
