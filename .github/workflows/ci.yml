@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  fmt:
+    name: Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.26.10'
+      - name: Check gofmt
+        run: |
+          if [ -z "$(git ls-files '*.go')" ]; then
+            echo 'No Go files yet. Skip.'
+            exit 0
+          fi
+          test -z "$(gofmt -l .)"
+
+  vet:
+    name: Vet
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.26.10'
+      - name: Run go vet
+        run: |
+          if [ ! -f go.mod ]; then
+            echo 'No go.mod yet. Skip.'
+            exit 0
+          fi
+          go vet ./...
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.26.10'
+      - name: Run go test
+        run: |
+          if [ ! -f go.mod ]; then
+            echo 'No go.mod yet. Skip.'
+            exit 0
+          fi
+          go test -race ./...
+
+  i18n:
+    name: I18n
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.26.10'
+      - name: Run i18n check
+        run: |
+          if [ ! -d tools/i18ncheck ]; then
+            echo 'No i18n checker yet. Skip.'
+            exit 0
+          fi
+          go run ./tools/i18ncheck
+
+  vuln:
+    name: Vuln
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.26.10'
+      - name: Run govulncheck
+        run: |
+          if [ ! -f go.mod ]; then
+            echo 'No go.mod yet. Skip.'
+            exit 0
+          fi
+          go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...
